@@ -1,0 +1,45 @@
+{
+    "defaults":
+     {
+         "colours":
+         {
+             "normal_text": "#FFFFFF"
+         }
+     },
+     "text_box":
+     {
+         "colours":
+         {
+             "dark_bg": "#000000C8",
+             "link_text": "#FF0000",
+             "link_hover": "#FFFF00",
+             "link_selected": "#FFFFFF"
+         },
+
+         "misc":
+         {
+             "border_width": "0",
+             "shadow_width": "0"
+         }
+     },
+    "button":
+    {
+        "colours":
+        {
+            "normal_bg": "#000000C8",
+            "hovered_bg": "#505050C8",
+            "active_bg": "#BBBBBBC8",
+
+            "hovered_text": "#FFFFFF",
+            "active_text": "#000000"
+        },
+
+        "misc":
+        {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "10",
+            "shadow_width": "2",
+            "border_width": "0"
+        }
+    }
+}

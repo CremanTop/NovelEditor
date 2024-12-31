@@ -1,0 +1,302 @@
+{
+    "nodes": {
+        "93257187133": {
+            "color": [
+                100,
+                100,
+                255,
+                255
+            ],
+            "position": [
+                410,
+                63
+            ],
+            "connector1": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    460.0,
+                    43
+                ],
+                "size": 20
+            },
+            "connector2": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    460.0,
+                    130
+                ],
+                "size": 20
+            },
+            "text": "vhbgbbgfbrtbytnthtyh dffd decwcre vregr rec revrevre vrevrev reree revrev revrevre vree crevrrre ferv frffrefvevre\nerre erfrevrerevrrtbrt v rtvreve efee  vdsedc rec ree ce cewc r cewc ec er e vre v\n efec vrevr evre ve vrevre rttr t tgtr gr grt\nrtgrtgrtgr trgt rgr gtrg rgtgr gt gt rtb brttrrrtbtrvreveevrevrevrevrevrev ervervre vre vrev rvrerevre vre verve\nevrevrev",
+            "type": 2,
+            "size": [
+                120,
+                67
+            ],
+            "image_path": "node_editor/images/upload/1.png"
+        },
+        "93257187153": {
+            "color": [
+                100,
+                100,
+                255,
+                255
+            ],
+            "position": [
+                440,
+                268
+            ],
+            "connector1": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    490.0,
+                    248
+                ],
+                "size": 20
+            },
+            "connector2": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    490.0,
+                    335
+                ],
+                "size": 20
+            },
+            "text": "\u0410\u0430\u0430\u0430gvreger",
+            "type": 2,
+            "size": [
+                120,
+                67
+            ],
+            "image_path": "node_editor/images/upload/2_3.png"
+        },
+        "93257187181": {
+            "color": [
+                100,
+                100,
+                255,
+                255
+            ],
+            "position": [
+                817,
+                404
+            ],
+            "connector1": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    867.0,
+                    384
+                ],
+                "size": 20
+            },
+            "connector2": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    867.0,
+                    471
+                ],
+                "size": 20
+            },
+            "text": "",
+            "type": 2,
+            "size": [
+                120,
+                67
+            ],
+            "image_path": "C:/Users/timab/PycharmProjects/pythonProject6/node_editor/images/upload//\u0448\u0430\u0445\u0442\u04301.jpeg"
+        },
+        "93257187213": {
+            "color": [
+                100,
+                100,
+                255,
+                255
+            ],
+            "position": [
+                715,
+                566
+            ],
+            "connector1": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    765.0,
+                    546
+                ],
+                "size": 20
+            },
+            "connector2": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    765.0,
+                    633
+                ],
+                "size": 20
+            },
+            "text": "",
+            "type": 2,
+            "size": [
+                120,
+                67
+            ],
+            "image_path": "C:/Users/timab/PycharmProjects/pythonProject6/node_editor/images/upload//\u043b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u0438\u044f1.jpeg"
+        },
+        "93257187245": {
+            "color": [
+                100,
+                100,
+                255,
+                255
+            ],
+            "position": [
+                378,
+                484
+            ],
+            "connector1": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    428.0,
+                    464
+                ],
+                "size": 20
+            },
+            "connector2": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "position": [
+                    428.0,
+                    551
+                ],
+                "size": 20
+            },
+            "text": "fgbrt",
+            "type": 2,
+            "size": [
+                120,
+                67
+            ],
+            "image_path": "C:/Users/timab/PycharmProjects/pythonProject6/node_editor/images/upload//\u0441\u0451\u0440\u04441.jpeg"
+        }
+    },
+    "arrows": [
+        {
+            "color": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "position": [
+                460.0,
+                130
+            ],
+            "start": "93257187133",
+            "end": "93257187153"
+        },
+        {
+            "color": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "position": [
+                490.0,
+                335
+            ],
+            "start": "93257187153",
+            "end": "93257187181"
+        },
+        {
+            "color": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "position": [
+                867.0,
+                471
+            ],
+            "start": "93257187181",
+            "end": "93257187213"
+        },
+        {
+            "color": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "position": [
+                765.0,
+                633
+            ],
+            "start": "93257187213",
+            "end": "93257187245"
+        },
+        {
+            "color": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "position": [
+                428.0,
+                551
+            ],
+            "start": "93257187245",
+            "end": "93257187181"
+        }
+    ],
+    "initial": 93257187133
+}
