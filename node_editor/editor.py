@@ -22,12 +22,12 @@ pg.font.init()
 
 
 def create_miniature(in_path: str, size: Tuple2D = (120, 67)) -> None:
-    image = pg.image.load(in_path)
+    image = pg.image.load(f'{config.get_dir_upload()}/{in_path}')
     scale = pg.transform.smoothscale(image, size)
     fon = Surface(size).convert_alpha()
     fon.fill(Color(255, 255, 255, 100))
     scale.blit(fon, fon.get_rect())
-    pg.image.save(scale, f'{config.get_dir_mini()}/{in_path[in_path.rfind("/"): in_path.find(".")]}.jpeg')
+    pg.image.save(scale, f'{config.get_dir_mini()}/{in_path[: in_path.find(".")]}.jpeg')
 
 
 def draw_circle(surface: Surface, x: int, y: int, radius: int, color: Color) -> NoReturn:
@@ -77,10 +77,11 @@ class Figure(Graphic, ABC):
 
 
 class Connector(Figure):
-    def __init__(self, node, is_receiver: bool) -> NoReturn:
+    def __init__(self, node, is_receiver: bool, mode: int = 0) -> NoReturn:
         super().__init__(Color(0, 0, 0), (0, 0))
         self.is_receiver: bool = is_receiver
         self.node: Node = node
+        self.mode: int = mode
         self.size: int = 20
         self.geom: Rect = pg.Rect(self.pos[0], self.pos[1], self.size, self.size)
 
@@ -125,6 +126,8 @@ Text = TypeVar("Text", bound=IText)
 
 
 class Node(Figure, ABC):
+    id: int = 0
+
     def __init__(self, position: Tuple2D, color: Color = Color(255, 255, 255)) -> NoReturn:
         super().__init__(color, position)
         self.connector1: Connector = Connector(self, True)
@@ -132,6 +135,8 @@ class Node(Figure, ABC):
         self.choosen: bool = False
         self.initial: bool = False
         # self.set_pos(position)
+        self.id: int = Node.id
+        Node.id += 1
 
     def __my_dict__(self) -> dict[str, Any]:
         _dict = super().__my_dict__()
@@ -214,7 +219,7 @@ class ImageNode(Node, IText, I2Sized):
         self.path_image: str = path_image
 
         if self.path_image is not None:
-            if os.path.exists(self.path_image):
+            if os.path.exists(f'{config.get_dir_upload()}/{self.path_image}'):
                 self.replace_image(path_image, is_mini_should)
 
     def draw(self, surface: Surface) -> NoReturn:
@@ -256,7 +261,7 @@ class ImageNode(Node, IText, I2Sized):
         return _dict
 
     def replace_image(self, path_image: str, is_mini_should: bool = True) -> NoReturn:
-        path_mini: str = f'{config.get_dir_mini()}/{path_image[path_image.rfind("/"): path_image.find(".")]}.jpeg'
+        path_mini: str = f'{config.get_dir_mini()}/{path_image[: path_image.find(".")]}.jpeg'
         if is_mini_should:
             if not os.path.exists(path_mini):
                 create_miniature(path_image, self.size)
@@ -334,6 +339,65 @@ class VarNode(Node, IText, I2Sized):
         return _dict
 
 
+class ConditionNode(Node, IText, I2Sized):
+    def __init__(self, position: Tuple2D, color: Color = Color(255, 255, 255), size: Tuple2D = (120, 67),
+                 centering: bool = True) -> NoReturn:
+        Node.__init__(self, position, color)
+        IText.__init__(self)
+        I2Sized.__init__(self, size)
+        self.connector2.mode = 1
+        self.connector3: Connector = Connector(self, False, mode=2)
+        self.geom: Rect = pg.Rect(self.pos[0] - 4, self.pos[1] - 4, self.size[0] + 8, self.size[1] + 8)
+        self.set_pos(position)
+        if centering:
+            self.set_pos(self.get_center())
+
+    def draw(self, surface: Surface) -> NoReturn:
+        color: Color = self.color
+        if self.choosen:
+            color = Color(255, 0, 0)
+        pg.draw.rect(surface, color, self.geom)
+        pg.draw.rect(surface, Color(200, 255, 200), pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]))
+
+        text: Surface = self.render_text()
+        surface.blit(text, text.get_rect(center=(self.pos[0] + self.size[0] // 2, self.pos[1] + self.size[1] // 2)))
+
+        self.connector1.draw(surface)
+        self.connector2.draw(surface)
+        self.connector3.draw(surface)
+        if self.initial:
+            pg.draw.polygon(surface, color, ((self.pos[0] - 20, self.pos[1] + self.size[1] // 2 - 20),
+                                             (self.pos[0] - 20, self.pos[1] + self.size[1] // 2 + 20),
+                                             (self.pos[0], self.pos[1] + self.size[1] // 2)))
+
+    def set_pos(self, position: Tuple2D) -> NoReturn:
+        super().set_pos(position)
+        self.geom = pg.Rect(self.pos[0] - 2, self.pos[1] - 2, self.size[0] + 4, self.size[1] + 4)
+        self.connector1.set_pos((position[0] + self.size[0] // 2, position[1] - self.connector1.size))
+        self.connector2.set_pos(
+            (position[0] - self.connector2.size // 2, position[1] + self.size[1] // 2 - self.connector2.size // 2))
+        self.connector3.set_pos(
+            (position[0] + self.size[0] + self.connector3.size // 2, position[1] + self.size[1] // 2 - self.connector3.size // 2))
+
+    def get_center(self) -> Tuple2D:
+        return self.pos[0] - self.size[0] // 2, self.pos[1] - self.size[1] // 2
+
+    def get_connector(self, pos: Tuple2D) -> Connector | bool:
+        if self.connector1.is_point_below(pos):
+            return self.connector1
+        return False
+
+    def __my_dict__(self) -> dict[str, Any]:
+        _dict = Node.__my_dict__(self)
+        _dict.update(IText.__my_dict__(self))
+        _dict.update(I2Sized.__my_dict__(self))
+        _dict.update({
+            'connector3': self.connector3.__my_dict__(),
+            'type': 5
+        })
+        return _dict
+
+
 class InputBox:
     def __init__(self, position: Tuple2D, manager: pygame_gui.UIManager, node: Node) -> NoReturn:
         self.node: Node = node
@@ -405,16 +469,37 @@ class VarBox(InputBox):
         self.mode._set_default_selection()
 
 
+class ConditionBox(VarBox):
+    def __init__(self, position: Tuple2D, manager: pygame_gui.UIManager, node: Node) -> NoReturn:
+        VarBox.__init__(self, position, manager, node)
+        self.mode.kill()
+        self.mode: UISelectionList = UISelectionList(pg.Rect(position[0] + 200, position[1], 100, 100),
+                                                     item_list=['==', '>', '<'],
+                                                     default_selection='==',
+                                                     manager=self.manager)
+
+    def set_node(self, node: Text) -> NoReturn:
+        self.node = node
+        if len(node.text) < 1:
+            return
+        self.entry.set_text(node.text.split()[0])
+        self.input_value.set_text(node.text.split()[-1])
+        self.mode._default_selection = 'Установить' if node.text.split()[1] == '=' else 'Увеличить' if node.text.split()[1] == '+=' else 'Уменьшить'
+        self.mode._set_default_selection()
+
+
 class EnumAction(Enum):
     set_main = 'Начальная'
     delete = 'Удалить'
     replace_text = 'Изменить текст'
     edit_var = 'Изменить переменную'
+    edit_cond = 'Изменить условие'
     import_image = 'Загрузить изображение'
     delete_answer = 'Удалить ответ'
     add_image_node = 'Добавить экран'
     add_answer_node = 'Добавить ответы'
     add_var_node = 'Добавить переменную'
+    add_condition_node = 'Добавить условие'
 
 
 class ActionBar(Figure, I2Sized):
@@ -427,7 +512,7 @@ class ActionBar(Figure, I2Sized):
 
     def _get_tasks(self) -> list[EnumAction]:
         if self.node is None:
-            return [EnumAction.add_image_node, EnumAction.add_answer_node, EnumAction.add_var_node]
+            return [EnumAction.add_image_node, EnumAction.add_answer_node, EnumAction.add_var_node, EnumAction.add_condition_node]
         tasks: list[EnumAction] = [EnumAction.delete]
         if isinstance(self.node, IText):
             tasks.append(EnumAction.replace_text)
@@ -437,7 +522,10 @@ class ActionBar(Figure, I2Sized):
             tasks.append(EnumAction.import_image)
         if isinstance(self.node, Answer):
             tasks.append(EnumAction.delete_answer)
-        if isinstance(self.node, VarNode):
+        if isinstance(self.node, ConditionNode):
+            tasks.append(EnumAction.edit_cond)
+            tasks.remove(EnumAction.replace_text)
+        elif isinstance(self.node, VarNode):
             tasks.append(EnumAction.edit_var)
             tasks.remove(EnumAction.replace_text)
         return tasks
@@ -488,6 +576,8 @@ class Answer(Figure, IText, I2Sized):
         self.node: ChoosenNode = node
         self.geom: Rect = pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
         self.connector2: Connector = Connector(self, False)
+        self.id: int = Node.id
+        Node.id += 1
 
         self.set_pos(position)
 
@@ -602,7 +692,7 @@ class ChoosenNode(Node, I2Sized):
         _dict.update(I2Sized.__my_dict__(self))
         _dict.update({
             'type': 3,
-            'answers': {hash(ans): ans.__my_dict__() for ans in self.answers}
+            'answers': {ans.id: ans.__my_dict__() for ans in self.answers}
         })
         return _dict
 
@@ -632,9 +722,35 @@ class Arrow(Graphic):
     def __my_dict__(self) -> dict[str, Any]:
         _dict = super().__my_dict__()
         _dict.update({
-            'start': str(hash(self.start.node)),
-            'end': str(hash(self.end.node))
+            'start': str(self.start.node.id),
+            'end': str(self.end.node.id)
         })
+        return _dict
+
+
+class TextArrow(Arrow, IText):
+    def __init__(self, first: Connector, second: Connector, color: Color = Color(0, 0, 0), text: str = '') -> NoReturn:
+        Arrow.__init__(self, first, second, color)
+        IText.__init__(self, text)
+
+        if first.mode == 1:
+            self.text = 'Yes'
+            self.color = Color(0, 220, 0)
+        elif first.mode == 2:
+            self.text = 'No'
+            self.color = Color(220, 0, 0)
+
+    def draw(self, surface: Surface) -> NoReturn:
+        Arrow.draw(self, surface)
+        text: Surface = self.render_text()
+        one, two = self.start.get_center(), self.end.get_center() if isinstance(self.end, Connector) else self.end
+        text_rect = text.get_rect(center=((one[0] + two[0]) // 2, (one[1] + two[1]) // 2))
+        pg.draw.rect(surface, Color(255, 255, 255), text_rect)
+        surface.blit(text, text_rect)
+
+    def __my_dict__(self) -> dict[str, Any]:
+        _dict = Arrow.__my_dict__(self)
+        _dict.update(IText.__my_dict__(self))
         return _dict
 
 
@@ -656,9 +772,12 @@ class Editor(Screen):
             (self.surface.get_width() / 2 - 200, self.surface.get_height() / 2 - 50), self.ui_manager, None)
         self.var_box: Optional[VarBox] = VarBox(
             (self.surface.get_width() / 2 - 200, self.surface.get_height() / 2 - 50), self.ui_manager, None)
+        self.cond_box: Optional[ConditionBox] = ConditionBox(
+            (self.surface.get_width() / 2 - 200, self.surface.get_height() / 2 - 50), self.ui_manager, None)
 
         self.input_box.deactivate()
         self.var_box.deactivate()
+        self.cond_box.deactivate()
 
         self.button_menu: UIButton = UIButton(relative_rect=pg.Rect(0, 0, 180, 30),
                                               text='Меню',
@@ -716,6 +835,8 @@ class Editor(Screen):
                     self.input_box.activate(self.action_bar.node)
                 case EnumAction.edit_var:
                     self.var_box.activate(self.action_bar.node)
+                case EnumAction.edit_cond:
+                    self.cond_box.activate(self.action_bar.node)
                 case EnumAction.import_image:
                     self.load_input = True
                     self.image_app.node = self.action_bar.node
@@ -729,6 +850,8 @@ class Editor(Screen):
                     self.nodes.append(ChoosenNode(pos))
                 case EnumAction.add_var_node:
                     self.nodes.append(VarNode(pos, Color(255, 180, 100)))
+                case EnumAction.add_condition_node:
+                    self.nodes.append(ConditionNode(pos, Color(100, 200, 120)))
 
     def node_handler(self, pos: Tuple2D) -> Node | Connector:
         for node in self.nodes:
@@ -740,6 +863,13 @@ class Editor(Screen):
                         return node.connector1
                     elif node.connector2.is_point_below(pos):
                         return node.connector2
+                case ConditionNode() as node:
+                    if node.connector1.is_point_below(pos):
+                        return node.connector1
+                    elif node.connector2.is_point_below(pos):
+                        return node.connector2
+                    elif node.connector3.is_point_below(pos):
+                        return node.connector3
                 case ChoosenNode() as node:
                     if node.connector1.is_point_below(pos):
                         return node.connector1
@@ -778,12 +908,12 @@ class Editor(Screen):
         self.serialize()
 
     def serialize(self) -> NoReturn:
-        initial: tuple[Node] = tuple(filter(lambda node: node.initial, self.nodes))
+        initial: tuple[Node, ...] = tuple(filter(lambda node: node.initial, self.nodes))
         _dict = {
             'version': '1.1',
-            'nodes': {hash(i): i.__my_dict__() for i in self.nodes},
+            'nodes': {node.id: node.__my_dict__() for node in self.nodes},
             'arrows': [i.__my_dict__() for i in self.arrows],
-            'initial': hash(initial[0]) if len(initial) > 0 else 0
+            'initial': initial[0].id if len(initial) > 0 else 0
         }
         with open(config.get_file_game(), mode='w') as file:
             json.dump(_dict, file, indent=' ' * 4)
@@ -833,6 +963,9 @@ class Editor(Screen):
                 case 4:
                     node_obj = VarNode(p, c, tuple(node['size']), centering=False)
 
+                case 5:
+                    node_obj = ConditionNode(p, c, tuple(node['size']), centering=False)
+
             if node.get('text'):
                 text: str = node['text']
                 node_obj.text = text
@@ -845,7 +978,15 @@ class Editor(Screen):
             start_hash: str = arrow['start']
             end_hash: str = arrow['end']
 
-            final_arrows.append(Arrow(final_nodes[start_hash].connector2, final_nodes[end_hash].connector1, c))
+            if 'text' in arrow:
+                text = arrow['text']
+                if text == 'Yes':
+                    conn = final_nodes[start_hash].connector2
+                else:
+                    conn = final_nodes[start_hash].connector3
+                final_arrows.append(TextArrow(conn, final_nodes[end_hash].connector1, c, text))
+            else:
+                final_arrows.append(Arrow(final_nodes[start_hash].connector2, final_nodes[end_hash].connector1, c))
         editor.nodes = list(v for v in final_nodes.values() if not isinstance(v, Answer))
         editor.arrows = final_arrows
         return editor
@@ -899,7 +1040,10 @@ class Editor(Screen):
                                     mode: bool = True if keys[pg.K_LSHIFT] else False
                                     self.add_choosen_node(node, mode)
                                 case Connector() as conn:
-                                    self.choosen_arrow = Arrow(conn, conn)
+                                    if conn.mode == 0:
+                                        self.choosen_arrow = Arrow(conn, conn)
+                                    else:
+                                        self.choosen_arrow = TextArrow(conn, conn)
                                 case _:
                                     pass
                         case 2:
@@ -978,8 +1122,15 @@ class Editor(Screen):
                             if y < 10:
                                 continue
                             create_miniature(node.path_image, (x, y))
-                            path_mini = f'{config.get_dir_mini()}/{node.path_image[node.path_image.rfind("/"): node.path_image.find(".")]}.jpeg'
+                            path_mini = f'{config.get_dir_mini()}/{node.path_image[: node.path_image.find(".")]}.jpeg'
                             node.image_mini = pg.image.load(path_mini).convert()
+                            node.size = (x, y)
+                            node.set_pos((node.pos[0] * koef, node.pos[1] * koef))
+                        elif isinstance(node, VarNode) or isinstance(node, ConditionNode):
+                            x, koef = calculations(node.size, event.y)
+                            y = x * 9 / 16
+                            if y < 10:
+                                continue
                             node.size = (x, y)
                             node.set_pos((node.pos[0] * koef, node.pos[1] * koef))
                         elif isinstance(node, ChoosenNode):
@@ -1005,6 +1156,12 @@ class Editor(Screen):
                         self.var_box.node.set_text(f'{self.var_box.entry.get_text()} {"=" if self.var_box.mode.get_single_selection() == "Установить" else "+=" if self.var_box.mode.get_single_selection() == "Увеличить" else "-="} {self.var_box.input_value.get_text()}')
                     case self.var_box.button_cancel:
                         self.var_box.deactivate()
+
+                    case self.cond_box.button_ok:
+                        self.cond_box.deactivate()
+                        self.cond_box.node.set_text(f'{self.cond_box.entry.get_text()} {self.cond_box.mode.get_single_selection()} {self.cond_box.input_value.get_text()}')
+                    case self.cond_box.button_cancel:
+                        self.cond_box.deactivate()
 
             self.ui_manager.process_events(event)
 
