@@ -28,5 +28,25 @@
             "border_width": "1",
             "shadow_width": "2"
         }
+    },
+    "label":
+    {
+         "colours":
+         {
+             "normal_text": "#cc0000",
+             "text_shadow": "#550000a0"
+         },
+         "font":
+         {
+             "size": 20,
+             "bold": "0",
+             "italic": "0"
+         },
+         "misc":
+         {
+             "text_shadow": "1",
+             "text_shadow_size": "1",
+             "text_shadow_offset": "-1,1"
+         }
     }
 }

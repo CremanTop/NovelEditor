@@ -29,19 +29,24 @@ class App:
         self.set_screen(AppState.menu)
 
     def set_screen(self, screen: AppState) -> NoReturn:
-        if self.state is AppState.editor:
-            self.screen.close_editor()
+        try:
+            if isinstance(self.screen, Editor):
+                self.screen.close_editor()
 
-        self.state: AppState = screen
+            self.state: AppState = screen
 
-        match screen:
-            case AppState.editor:
-                self.screen = Editor.deserialize()
-            case AppState.game:
-                self.screen = GameScreen()
-            case AppState.menu:
-                self.screen = MenuScreen()
-        self.screen.update()
+            match screen:
+                case AppState.editor:
+                    self.screen = Editor.deserialize()
+                case AppState.game:
+                    self.screen = GameScreen()
+                case AppState.menu:
+                    self.screen = MenuScreen()
+            self.screen.update()
+        except FileNotFoundError:
+            print('Указан неправильный путь к файлу')
+            if isinstance(self.screen, MenuScreen):
+                self.screen.alert.set_text('Не получается открыть файл игры')
 
     def run(self):
         while True:

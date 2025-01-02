@@ -22,7 +22,7 @@ class Config:
         self._path: Optional[str] = ''
         self._game_file: Optional[str] = None
 
-    def set_root(self, path: str) -> NoReturn:
+    def set_root(self, path: str) -> NoReturn | str:
 
         def _fing_json() -> str:
             for file in os.listdir(path):
@@ -30,7 +30,10 @@ class Config:
                     return file
 
         self._path = path
-        self._game_file = _fing_json()
+        try:
+            self._game_file = _fing_json()
+        except FileNotFoundError:
+            return 'Файл не найден, укажите правильный путь'
 
         print(self._path, self._game_file)
 

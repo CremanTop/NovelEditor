@@ -45,7 +45,7 @@ class ImageLoadApp(Screen):
                         self.load_button.disable()
 
                     case self.accept_button:
-                        self.node.replace_image(self.file_path)
+                        self.node.replace_image(self.file_path[self.file_path.rfind("/") + 1:])
                         self.editor.load_input = False
 
             if event.type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
@@ -82,7 +82,7 @@ class ImageLoadApp(Screen):
                     self.accept_button.enable()
 
                 except pygame.error as er:
-                    pass
+                    print('Непонятная ошибка')
 
             if event.type == pygame_gui.UI_WINDOW_CLOSE and event.ui_element == self.file_dialog:
                 self.load_button.enable()

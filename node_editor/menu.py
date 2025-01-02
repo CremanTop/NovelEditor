@@ -24,7 +24,8 @@ def create_game_dir(path: str) -> NoReturn:
 class MenuScreen(Screen):
     def __init__(self) -> NoReturn:
         super().__init__()
-        self.ui_manager: pygame_gui.UIManager = pygame_gui.UIManager(self.surface.get_size(), resource_path('theme.json'))
+        self.ui_manager: pygame_gui.UIManager = pygame_gui.UIManager(self.surface.get_size(),
+                                                                     resource_path('theme.json'))
 
         buttons: dict[str, tuple[int, int, int, int]] = {
             'Создать новую игру': (20, 60, 250, 30),
@@ -55,6 +56,16 @@ class MenuScreen(Screen):
                                                                   'top': 'top',
                                                                   'bottom': 'bottom'})
 
+        self.alert = pygame_gui.elements.UILabel(relative_rect=pg.Rect(20, 190, -1, 30),
+                                                 text='',
+                                                 manager=self.ui_manager,
+                                                 anchors={
+                                                     'left': 'left',
+                                                     'right': 'right',
+                                                     'top': 'top',
+                                                     'bottom': 'bottom'}
+                                                 )
+
     def update(self) -> NoReturn:
         self.surface.fill('white')
 
@@ -76,7 +87,11 @@ class MenuScreen(Screen):
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 if event.ui_element == self.input_path:
                     path = event.text.replace('\\', '/')
-                    config.set_root(path)
+                    message = config.set_root(path)
+                    if message:
+                        self.alert.set_text(message)
+                    else:
+                        self.alert.set_text('')
             self.ui_manager.process_events(event)
 
         if len(events) > 0:
