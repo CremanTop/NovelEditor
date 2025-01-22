@@ -298,6 +298,7 @@ class VarNode(Node, IText, I2Sized):
         Node.__init__(self, position, color)
         IText.__init__(self)
         I2Sized.__init__(self, size)
+        self.connector2 = None
         self.geom: Rect = pg.Rect(self.pos[0] - 4, self.pos[1] - 4, self.size[0] + 8, self.size[1] + 8)
         self.set_pos(position)
         if centering:
@@ -314,7 +315,6 @@ class VarNode(Node, IText, I2Sized):
         surface.blit(text, text.get_rect(center=(self.pos[0] + self.size[0] // 2, self.pos[1] + self.size[1] // 2)))
 
         self.connector1.draw(surface)
-        self.connector2.draw(surface)
         if self.initial:
             pg.draw.polygon(surface, color, ((self.pos[0] - 20, self.pos[1] + self.size[1] // 2 - 20),
                                              (self.pos[0] - 20, self.pos[1] + self.size[1] // 2 + 20),
@@ -324,7 +324,6 @@ class VarNode(Node, IText, I2Sized):
         super().set_pos(position)
         self.geom = pg.Rect(self.pos[0] - 2, self.pos[1] - 2, self.size[0] + 4, self.size[1] + 4)
         self.connector1.set_pos((position[0] + self.size[0] // 2, position[1] - self.connector1.size))
-        self.connector2.set_pos((position[0] + self.size[0] // 2, position[1] + self.size[1]))
 
     def get_center(self) -> Tuple2D:
         return self.pos[0] - self.size[0] // 2, self.pos[1] - self.size[1] // 2
@@ -858,11 +857,14 @@ class Editor(Screen):
             if node.is_point_below(pos):
                 return node
             match node:
-                case ImageNode() | VarNode() as node:
+                case ImageNode() as node:
                     if node.connector1.is_point_below(pos):
                         return node.connector1
                     elif node.connector2.is_point_below(pos):
                         return node.connector2
+                case VarNode() as node:
+                    if node.connector1.is_point_below(pos):
+                        return node.connector1
                 case ConditionNode() as node:
                     if node.connector1.is_point_below(pos):
                         return node.connector1
